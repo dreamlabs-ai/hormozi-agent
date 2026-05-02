@@ -1,5 +1,5 @@
 {
-  "version": "1",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "hormozi-agent",
   "description": "Drop-in Hormozi-style content + business AI agent for Claude Code",
   "owner": {
@@ -11,10 +11,9 @@
       "name": "hormozi",
       "description": "Hormozi-style business + content agent. Onboards your business, ingests your past tweets and YouTube transcripts, learns from creators you admire, and generates ideas + scripts in your voice using Hormozi's frameworks.",
       "version": "0.1.0",
-      "source": {
-        "type": "git-dir",
-        "path": "hormozi"
-      }
+      "category": "productivity",
+      "source": "./hormozi",
+      "homepage": "https://github.com/dreamlabs-ai/hormozi-agent"
     }
   ]
 }
