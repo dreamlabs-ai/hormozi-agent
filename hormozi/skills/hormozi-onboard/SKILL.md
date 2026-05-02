@@ -1,61 +1,77 @@
 ---
 name: hormozi-onboard
 description: >
-  Hormozi-style onboarding wizard. Walks the user through the 12 business-context
-  questions one at a time and saves each answer to ~/hormozi/business.md as it comes
-  in. Marks step1_onboard true in ~/.claude/hormozi-setup.json when finished. Invoked
-  by the master /hormozi skill or directly via /hormozi onboard.
+  Onboarding wizard. Hits the user with the dream-outcome pitch first, then walks
+  them through the 12 business-context questions one at a time. Saves answers to
+  ~/hormozi/business.md. Marks onboarded=true in ~/.claude/hormozi-setup.json.
+  Invoked only by the master /hormozi skill — users never call this directly.
 allowed-tools:
   - Read
   - Write
   - Edit
-  - Bash(mkdir *)
-  - Bash(date *)
+  - Bash
 ---
 
-# Hormozi Onboard — The 12 Questions
+# Hormozi Onboard — The Dream Pitch + 12 Questions
 
-You are running the onboarding wizard. You ask 12 questions, one at a time, and save each answer to `~/hormozi/business.md` as it comes in. Follow the dreamlabs-style rules — double-spaced, emoji-coded, encouraging.
+You run the onboarding wizard. It has TWO parts that always run in sequence: the dream-outcome pitch (excite), then the 12 questions (capture).
 
-## Setup
+## Part 1: The dream-outcome pitch (ALWAYS FIRST)
 
-1. Ensure `~/hormozi/` exists (`mkdir -p ~/hormozi`).
-
-2. If `~/hormozi/business.md` doesn't exist, copy the template from the plugin's `templates/business-md.template`. Substitute `{{DATE}}` with today's date. Leave the `{{Q*_ANSWER}}` placeholders for now.
-
-3. Read `~/.claude/hormozi-setup.json`. If it doesn't exist, fall back to creating it (master skill should have already done this, but be defensive).
-
-## Open the wizard
-
-Show this header on the first invocation:
+Show this verbatim before anything else:
 
 ```
 
 ═══════════════════════════════════════════════
-   🔧  ONBOARDING — THE 12 QUESTIONS
+   🚀  WELCOME TO YOUR HORMOZI AGENT
 ═══════════════════════════════════════════════
 
-   Hormozi has 12 questions he asks every business.
+   In about 10 minutes, you'll have...
 
-   The answers become your agent's brain.
+   ✅  Tweets that sound like you — only sharper
 
-   Take your time. Voice your answers in if you can.
+   ✅  YouTube hooks that stop the scroll
 
-   Type 'skip' on any question to come back later.
+   ✅  TikTok scripts engineered for the For You page
+
+   ✅  Instagram posts that hit your saves
+
+   ✅  Emails that actually get opened
+
+   All authentic. All on-brand. All Hormozi-grade.
+
+   Click of a button. Forever.
 
 ═══════════════════════════════════════════════
+
+   First step: I need to learn your business.
+
+   12 quick questions. Voice them in if you can —
+
+   it'll take 5 minutes if you talk fast.
+
+   Ready? Just say "yes" and we'll start.
 
 ```
 
-## The 12 questions
+**Wait for the user to confirm** before going further. If they say no / not ready / skip, end politely: "No worries — run /hormozi any time you're ready."
 
-Ask them ONE at a time. Wait for the answer before showing the next. After each answer, replace the corresponding `{{QN_ANSWER}}` in `~/hormozi/business.md` with the user's answer.
+## Part 2: The 12 questions (sequential, locked)
 
-After each answer, show a tiny progress line:
+When they confirm, set up:
 
-`   ▓▓░░░░░░░░░░░░░░░░░░░░  Question 2 of 12  •  17%`
+1. `mkdir -p ~/hormozi`
 
-Then the next question.
+2. If `~/hormozi/business.md` doesn't exist, copy `templates/business-md.template` from the plugin's directory. Replace `{{DATE}}` with today's date. Leave `{{Q*_ANSWER}}` placeholders.
+
+Then ask the 12 questions **one at a time**. Wait for each answer. Save each answer to `business.md` immediately (replace the corresponding `{{QN_ANSWER}}`).
+
+After each answer:
+- Acknowledge in ONE short sentence — no analysis, no advice
+- Show the progress line: `   ▓▓░░░░░░░░░░░░░░░░░░  Question N of 12  •  X%`
+- Show the next question
+
+**The 12 questions:**
 
 ### Q1 — Avatar
 
@@ -71,113 +87,108 @@ Then the next question.
 
 > Be concrete and measurable. Numbers + timeframes if you can.
 
-> *Example: "Their first $10K month from a single product, in 90 days."*
-
 ### Q3 — Perceived Likelihood
 
 > 💡  **What proof do you have that it works?**
 
-> Testimonials, case studies, your own results, credentials. List what you can show.
-
-> *If you have nothing yet, say so. We'll address it.*
+> Testimonials, case studies, your own results, credentials.
 
 ### Q4 — Time Delay
 
 > 💡  **How fast do they get the result?**
 
-> Days, weeks, months. Be honest — fast wins are huge in the value equation.
+> "First small win in X. Full transformation in Y."
 
 ### Q5 — Effort & Sacrifice
 
 > 💡  **How much work do they have to do?**
 
-> DIY, done-with-you, or done-for-you? How many hours per week?
+> DIY, done-with-you, or done-for-you? Hours per week?
 
 ### Q6 — Top 3 Problems
 
 > 💡  **What are the 3 biggest things in their way?**
 
-> The obstacles between them and the dream outcome.
-
-> *These become the bonuses you stack into your offer.*
-
 ### Q7 — Current Offer
 
 > 💡  **What are you selling right now?**
 
-> One line. Target + outcome + timeframe. *e.g. "6-week revenue machine for coaches."*
+> One line. Target + outcome + timeframe.
 
 ### Q8 — Price
 
 > 💡  **What does it cost?**
 
-> Price + cadence (monthly / one-time / per-engagement).
+> Price + cadence (monthly / one-time / per-engagement / annual).
 
 ### Q9 — Lead Magnet
 
 > 💡  **What's your free entry point?**
 
-> The thing people get for handing over their email. Type "none yet" if you don't have one.
+> Type "none yet" if you don't have one.
 
 ### Q10 — Traffic Source
 
-> 💡  **Which of the Core 4 channels are you running?**
+> 💡  **Where does your audience find you right now?**
 
-> Warm outreach, content, cold outreach, paid ads — by you or by others. Be honest about which are actually live vs aspirational.
+> X, YouTube, Instagram, TikTok, podcast, etc. — be specific about which.
 
-### Q11 — Retention
+### Q11 — Voice — Casual or Formal?
 
-> 💡  **How long do customers stick around?**
+> 💡  **How do you naturally talk to your audience?**
 
-> Average months retained, monthly churn %, or "I don't know yet" — that's a fine answer.
+> Casual + raw, polished + premium, somewhere in between?
 
-### Q12 — Ascension
+### Q12 — Forbidden words
 
-> 💡  **What's the next product up the ladder?**
+> 💡  **Any words, phrases, or topics you NEVER want in your content?**
 
-> What do customers buy after they finish your current offer? Type "I only have one product" if so.
+> Reply "none" if you don't have any.
 
 ## On 'skip'
 
-If the user types 'skip', leave that section's `{{QN_ANSWER}}` placeholder as-is and move on. At the end, list the skipped questions and offer to come back to them.
+If the user types `skip`, leave the placeholder, move on. At the end, list what was skipped and offer to fill them in next time.
 
 ## On completion
 
-1. Update `~/.claude/hormozi-setup.json` — set `step1_onboard: true`. Save.
+1. Update `~/.claude/hormozi-setup.json` — set `onboarded: true`. Save.
 
-2. Show this celebration:
+2. Show this:
 
 ```
 
 ═══════════════════════════════════════════════
-   🎉  ONBOARDING COMPLETE
+   🎉  STEP 1 COMPLETE — YOUR VOICE IS LOCKED IN
 ═══════════════════════════════════════════════
-
-   ✅  business.md is locked in
-
-   ✅  Your agent now has its brain
 
    📁  ~/hormozi/business.md
 
-   ▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░  17% setup
+   ▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░  33%
 
 ═══════════════════════════════════════════════
 
+   Next up: I'm going to pull your past content so
+
+   the agent learns to sound exactly like you —
+
+   tweets, YouTube transcripts, IG, TikTok.
+
+   100% public scrape. No app connections needed.
+
+   Run /hormozi to continue.
+
 ```
 
-3. Offer the next step:
+## Hard rules — read carefully
 
-> Ready for **Step 2: Connect your apps**?
-
-> Type `/hormozi connect` when you are.
-
-## Tone
-
-Encouraging. Specific. Don't lecture. If the user gives a thin answer, ask ONE follow-up question to sharpen it — but don't pile on. The point is to get all 12 answers down, not to perfect any single one.
+- **NEVER analyse the answers.** Don't comment on whether their offer is strong, their pricing is right, their churn is bad, their lead magnet should exist. Just record.
+- **NEVER suggest improvements.** They didn't ask. The next step is data, not advice.
+- **NEVER lecture about Hormozi frameworks during onboard.** The frameworks live inside the writer subagent — the user doesn't need to see them.
+- **Acknowledge in one short sentence.** "Locked in." or "Got it." or a tight observation about the answer's content. Never a paragraph.
 
 ## What this skill does NOT do
 
-- Doesn't analyse the answers (that comes later in idea/generate)
-- Doesn't pull data
-- Doesn't connect apps
-- Just asks and saves
+- Doesn't pull data (that's the next skill)
+- Doesn't generate content
+- Doesn't analyse anything
+- Just asks 12 questions and saves answers

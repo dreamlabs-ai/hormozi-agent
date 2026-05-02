@@ -1,6 +1,6 @@
 # Hormozi Agent
 
-A drop-in Claude Code plugin that turns your terminal into a Hormozi-style business + content agent.
+A drop-in Claude Code plugin that turns your terminal into a Hormozi-grade content factory. Authentic, on-brand tweets, IG posts, YouTube scripts, TikTok scripts, and emails — at the click of a button.
 
 ## Install
 
@@ -14,24 +14,23 @@ Open Claude Code and paste these three lines:
 
 That's it. The wizard takes over from there.
 
-## What it does
+## How it works
 
-1. **Onboards your business** — walks you through Hormozi's 12 questions and saves the answers to `~/hormozi/business.md`
-2. **Connects your apps** — wires up the MCPs you run your business on (X, YouTube, Notion, Gmail, Slack, etc.)
-3. **Pulls your back data** — your tweets and YouTube transcripts so the agent learns *your voice*
-4. **Pulls your inspiration** — creators you want to make content like
-5. **Generates ideas** — `/hormozi idea "topic"` gives you 5–10 idea variants
-6. **Generates scripts** — `/hormozi generate "idea"` outputs a screen-record-friendly HTML script
+The agent runs in a **locked linear sequence** — every step always follows the last:
+
+1. **Onboard** — 12 questions to lock in your voice, avatar, and offer (saved to `~/hormozi/business.md`)
+2. **Back Data** — pulls your past content from X / YouTube / Instagram / TikTok via public scrape (no app connections needed)
+3. **Create** — every future `/hormozi` run is a content session: `pick type → pick 1-5 reference pieces → submit idea → get 5 variants to choose from`
+
+It does **content only**. It will never give business advice, analyse your offer, or comment on your strategy.
 
 ## Files it creates on your machine
 
 ```
-~/.claude/hormozi-setup.json     # Wizard progress
+~/.claude/hormozi-setup.json     # Wizard progress (2 flags: onboarded, data_pulled)
 ~/hormozi/business.md            # The 12 answers
-~/hormozi/connections.json       # Which MCPs are wired up
-~/hormozi/data/                  # Your tweets + YT transcripts
-~/hormozi/inspiration/           # Creators you admire
-~/hormozi/output/                # Generated HTML scripts
+~/hormozi/data/                  # Your tweets, YT transcripts, IG, TikTok captions
+~/hormozi/output/                # Saved generations, one .md per piece
 ```
 
 Everything is local. Edit `business.md` by hand any time.

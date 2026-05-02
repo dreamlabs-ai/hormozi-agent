@@ -1,10 +1,11 @@
 ---
 name: hormozi-backdata
 description: >
-  Pulls the user's past content into ~/hormozi/data/ so the agent can mimic their voice.
-  Two independent sub-flows: tweets (X handle scrape OR archive zip) and YouTube
-  (channel URL or list of video URLs → transcripts). User can do one, both, or skip.
-  Marks step3_backdata true once at least one source has data.
+  Pulls the user's past content from public sources (X, YouTube, Instagram, TikTok)
+  into ~/hormozi/data/. No MCP / app-connection required — pure public scrape.
+  Each platform is independent; if one fails, others still complete. Marks
+  data_pulled=true when at least one platform succeeds. Invoked only by the master
+  /hormozi skill.
 allowed-tools:
   - Read
   - Write
@@ -12,115 +13,174 @@ allowed-tools:
   - Bash
 ---
 
-# Hormozi Backdata — Tweets + YouTube
+# Hormozi Backdata — Pull Their Past Content
 
-You pull the user's past content into local files. Follow the dreamlabs-style rules.
+You pull the user's public content into `~/hormozi/data/`. The agent uses this content as voice training material on every future generation.
 
-## Open
+## The single question (no menus, no choices)
+
+Show this:
 
 ```
 
 ═══════════════════════════════════════════════
-   📁  BACK DATA — YOUR VOICE
+   📁  STEP 2 — YOUR PAST CONTENT
 ═══════════════════════════════════════════════
 
-   Your agent gets sharper when it can see how you actually talk.
+   I'm going to pull your public content so the
 
-   Pick what to feed in:
+   agent learns your exact voice.
 
-   1.  Tweets / X archive
+   Drop your handles below — paste any you have,
 
-   2.  YouTube transcripts
+   skip any you don't:
 
-   3.  Both
+      X / Twitter:        @handle  (or skip)
 
-   4.  Skip — I'll do this later
+      YouTube:            channel URL  (or skip)
+
+      Instagram:          @handle  (or skip)
+
+      TikTok:             @handle  (or skip)
+
+   Just paste them in one message — I'll figure it out.
 
 ═══════════════════════════════════════════════
 
 ```
 
-## Sub-flow A — Tweets
+Wait for the user's reply. Parse out whatever handles they give you.
 
-Two paths, ask which:
+## Per-platform pull (run only for handles they provided)
 
-### A1. They paste an X handle
+For each platform the user gave you, pull and save independently. **If a platform fails, log it and move on — never block.**
 
-1. Run a fetcher to get their public tweets. Try in this order:
-   - `npx -y @the-convocation/twitter-scraper@latest <handle>` if available
-   - Otherwise: `curl -s "https://nitter.net/<handle>/rss"` and parse the RSS
-   - If neither works, fall back to A2 (archive upload)
+### X / Twitter
 
-2. Save normalized JSON to `~/hormozi/data/tweets.json`:
+1. Try the public nitter RSS first:
+   ```
+   curl -s -A "Mozilla/5.0" "https://nitter.net/<handle>/rss" -o /tmp/x.rss --max-time 15
+   ```
+2. Parse the RSS items into JSON:
+   - `id`, `date`, `link`, `text` per tweet
+3. Save to `~/hormozi/data/tweets.json`:
+   ```json
+   {
+     "handle": "@handle",
+     "fetched": "YYYY-MM-DD",
+     "source": "nitter rss",
+     "count": N,
+     "tweets": [...]
+   }
+   ```
+4. If nitter returns nothing or errors out, tell the user: "X didn't pull cleanly — you can drop your X archive zip later via `/hormozi`. Moving on." Do NOT block.
 
-```json
-{
-  "handle": "@username",
-  "fetched": "2026-05-02",
-  "count": 287,
-  "tweets": [
-    {"id": "...", "date": "2026-04-15", "text": "..."}
-  ]
-}
+### YouTube
+
+1. Ensure `yt-dlp` is installed (`which yt-dlp`). If not, run `brew install yt-dlp` and continue.
+2. Pull the most recent 15 transcripts from the channel:
+   ```
+   cd ~/hormozi/data/youtube && yt-dlp --write-auto-sub --skip-download \
+     --sub-format vtt --sub-lang en --output "%(id)s.%(ext)s" \
+     --playlist-end 15 "<channel-url>"
+   ```
+3. Convert each `.vtt` → cleaned `.txt` (strip timestamps, dedupe lines):
+   - Use Python with regex to parse the VTT
+   - Save as `~/hormozi/data/youtube/<videoId>.txt`
+   - Delete the original `.vtt`
+4. If the channel has no auto-captions (subtitle download warns "no subtitles"), tell the user and move on.
+
+### Instagram
+
+1. Try `yt-dlp` for IG too — it can pull post metadata + captions for public profiles:
+   ```
+   yt-dlp --skip-download --write-info-json --playlist-end 15 \
+     -o "~/hormozi/data/instagram/%(id)s.%(ext)s" \
+     "https://instagram.com/<handle>"
+   ```
+2. Parse the resulting `.info.json` files for `description` / caption text.
+3. Save to `~/hormozi/data/instagram/posts.json`:
+   ```json
+   { "handle": "@handle", "fetched": "...", "count": N, "posts": [{"id":"...", "caption":"...", "url":"..."}] }
+   ```
+4. If IG blocks the request (very common), tell the user: "IG blocked the public scrape — you can paste captions later. Moving on."
+
+### TikTok
+
+1. Try `yt-dlp` for TikTok:
+   ```
+   yt-dlp --skip-download --write-info-json --playlist-end 15 \
+     -o "~/hormozi/data/tiktok/%(id)s.%(ext)s" \
+     "https://tiktok.com/@<handle>"
+   ```
+2. Parse `.info.json` for `description` / video text.
+3. Save to `~/hormozi/data/tiktok/posts.json` in the same shape as IG.
+4. If it fails, log and move on.
+
+## Show progress as you go
+
+For each platform, show ONE line of status:
+
 ```
-
-### A2. They have an X archive zip
-
-1. Ask them to download their X archive (Settings → Your account → Download an archive of your data).
-2. Once they have it, ask for the absolute path to the `.zip` or unzipped folder.
-3. Find `data/tweets.js` or `data/tweet.js` in the archive. Parse it (it's JSON wrapped in a JS variable assignment — strip the leading `window.YTD.tweets.part0 = ` or similar).
-4. Save to `~/hormozi/data/tweets.json` in the same shape as A1.
-
-After either path: `🎉 Pulled N tweets into ~/hormozi/data/tweets.json`
-
-## Sub-flow B — YouTube
-
-1. Ask: "Paste a channel URL OR a list of video URLs (one per line)."
-
-2. Get the video list:
-   - For a channel URL: use `yt-dlp --flat-playlist -J <url>` to get every video ID. Take the most recent 50 by default — confirm with user if they want more or fewer.
-   - For a video list: parse out the video IDs.
-
-3. For each video ID, pull the transcript:
-   - `yt-dlp --write-auto-sub --skip-download --sub-format vtt --output "%(id)s" <url>` then read the `.vtt` and strip timestamps
-   - Save the cleaned plaintext to `~/hormozi/data/youtube/<videoId>.txt`
-
-4. If `yt-dlp` isn't installed, tell the user to run `brew install yt-dlp` (macOS) or `pip install yt-dlp`. Offer to wait.
-
-5. Show progress as you go: `▓▓▓░░░░░░ 12 / 50 transcripts pulled`
-
-After: `🎉 Pulled N transcripts into ~/hormozi/data/youtube/`
+   🔄  Pulling X tweets...     ✅  20 tweets
+   🔄  Pulling YouTube...      ✅  15 transcripts
+   🔄  Pulling Instagram...    ✴️  blocked, skipped
+   🔄  Pulling TikTok...       ✅  12 captions
+```
 
 ## On completion
 
-If at least ONE source has data, update `~/.claude/hormozi-setup.json` — set `step3_backdata: true`.
+If at least ONE platform succeeded:
+
+1. Update `~/.claude/hormozi-setup.json`:
+   - `data_pulled: true`
+   - `platforms_loaded: ["x", "youtube", ...]` (only the ones that worked)
+
+2. Show:
 
 ```
 
 ═══════════════════════════════════════════════
-   ✅  BACK DATA INGESTED
+   🎉  STEP 2 COMPLETE — YOU'RE READY
 ═══════════════════════════════════════════════
 
-   📁  ~/hormozi/data/tweets.json     (N tweets)
+   ✅  X:           N tweets
 
-   📁  ~/hormozi/data/youtube/         (M transcripts)
+   ✅  YouTube:     M transcripts
 
-   Ready for **Step 4: Inspiration**?
+   ✅  Instagram:   K captions
 
-   That's where we feed in creators you want to make content like.
+   ✅  TikTok:      P captions
 
-   Type /hormozi inspiration to start.
+   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░  67%
 
 ═══════════════════════════════════════════════
+
+   You're ready to make content.
+
+   Run /hormozi any time — every run is a fresh
+
+   content session. Type → models → idea → variants.
+
+   Let's make something. Run /hormozi now.
 
 ```
 
-## Tone
+## If ALL platforms fail
 
-Practical. If a tool is missing, give the exact install command and move on. Don't apologise — direct and helpful.
+Set `data_pulled: true` anyway (don't trap the user) but show:
+
+> ✴️  No platforms pulled cleanly. The agent will work without back data — content will be generic. Re-run /hormozi backdata later if you want to retry, or paste your X archive zip.
+
+## Hard rules
+
+- **NEVER analyse their content.** Don't comment on engagement, hooks, performance — just count and store.
+- **NEVER suggest content changes.** This skill ingests, nothing else.
+- **NEVER block on failure.** Each platform is independent. Move on.
 
 ## What this skill does NOT do
 
-- Doesn't post anywhere
-- Doesn't analyse the content (that happens in idea/generate)
-- Doesn't pull non-public content (no X DMs, no private YT)
+- Doesn't ask for app connections / MCPs (this agent is public-scrape-only)
+- Doesn't analyse the content
+- Doesn't generate content
+- Doesn't loop creators of inspiration — that's not part of the v0.2 flow

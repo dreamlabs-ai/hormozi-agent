@@ -9,8 +9,8 @@
   "plugins": [
     {
       "name": "hormozi",
-      "description": "Hormozi-style business + content agent. Onboards your business, ingests your past tweets and YouTube transcripts, learns from creators you admire, and generates ideas + scripts in your voice using Hormozi's frameworks.",
-      "version": "0.1.0",
+      "description": "Hormozi-style content factory. Authentic on-brand tweets, IG posts, YouTube scripts, TikTok scripts, and emails — at the click of a button. Locked sequence: onboard → backdata → create. Public scrape only, no app connections needed.",
+      "version": "0.2.0",
       "category": "productivity",
       "source": "./hormozi",
       "homepage": "https://github.com/dreamlabs-ai/hormozi-agent"
