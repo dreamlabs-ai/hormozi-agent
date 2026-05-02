@@ -20,7 +20,19 @@ The agent runs in a **locked linear sequence** — every step always follows the
 
 1. **Onboard** — 12 questions to lock in your voice, avatar, and offer (saved to `~/hormozi/business.md`)
 2. **Back Data** — pulls your past content from X / YouTube / Instagram / TikTok via public scrape (no app connections needed)
-3. **Create** — every future `/hormozi` run is a content session: `pick type → pick 1-5 reference pieces → submit idea → get 5 variants to choose from`
+3. **Create** — pick a platform command and run a content session
+
+The 5 platform commands:
+
+```
+/hormozi-x             Tweet / X thread        →  5 variants
+/hormozi-yt            YouTube script          →  3 variants
+/hormozi-ig            Instagram caption       →  5 variants
+/hormozi-tt            TikTok script           →  5 variants
+/hormozi-newsletter    Email newsletter        →  3 variants
+```
+
+Each one runs the same locked sub-flow: **load context + your data + the platform's pre-installed Hormozi prompt → pick 1-5 reference pieces from your past content → submit your idea → variants returned → save the chosen one.**
 
 It does **content only**. It will never give business advice, analyse your offer, or comment on your strategy.
 
