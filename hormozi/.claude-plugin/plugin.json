@@ -8,7 +8,5 @@
   },
   "homepage": "https://github.com/dreamlabs-ai/hormozi-agent",
   "repository": "https://github.com/dreamlabs-ai/hormozi-agent",
-  "keywords": ["hormozi", "content", "marketing", "business", "ai-agent"],
-  "skills": "./skills/",
-  "agents": "./agents/"
+  "keywords": ["hormozi", "content", "marketing", "business", "ai-agent"]
 }
