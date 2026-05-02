@@ -1,0 +1,12 @@
+{
+  "name": "himoozai",
+  "displayName": "Himoozai Agent",
+  "version": "0.4.0",
+  "description": "Hormozi-method content factory. Tweets, IG Reels, YouTube, TikTok, newsletters — at the click of a button. Run /himoozai to start.",
+  "author": {
+    "name": "Dream Labs AI"
+  },
+  "homepage": "https://github.com/dreamlabs-ai/himoozai-agent",
+  "repository": "https://github.com/dreamlabs-ai/himoozai-agent",
+  "keywords": ["himoozai", "hormozi", "content", "marketing", "ai-agent", "creator-tools"]
+}

@@ -1,52 +1,73 @@
-# Hormozi Agent
+# Himoozai Agent
 
-A drop-in Claude Code plugin that turns your terminal into a Hormozi-grade content factory. Authentic, on-brand tweets, IG posts, YouTube scripts, TikTok scripts, and emails — at the click of a button.
+A drop-in Claude Code plugin that turns your terminal into a Hormozi-method content factory. Authentic, on-brand tweets, YouTube scripts, Instagram Reels, TikTok scripts, and email newsletters — at the click of a button.
 
 ## Install
 
 Open Claude Code and paste these three lines:
 
 ```
-/plugin marketplace add dreamlabs-ai/hormozi-agent
-/plugin install hormozi@hormozi-agent
-/hormozi
+/plugin marketplace add dreamlabs-ai/himoozai-agent
+/plugin install himoozai@himoozai-agent
+/himoozai
 ```
 
 That's it. The wizard takes over from there.
 
 ## How it works
 
-The agent runs in a **locked linear sequence** — every step always follows the last:
+Locked linear setup, then unlimited content sessions:
 
-1. **Onboard** — 12 questions to lock in your voice, avatar, and offer (saved to `~/hormozi/business.md`)
-2. **Back Data** — pulls your past content from X / YouTube / Instagram / TikTok via public scrape (no app connections needed)
-3. **Create** — pick a platform command and run a content session
+1. **Onboard** — 12 questions → `~/himoozai/business.md` (your voice, avatar, offer)
+2. **Back Data** — pulls your past content from X / YouTube / Instagram / TikTok (public scrape, no app connections). This becomes your **voice anchor** on every generation.
+3. **Inspiration** — load 3–5 creators you want to make content like. Their content becomes the **structural anchor** at create-time.
 
-The 5 platform commands:
+After setup, pick a platform command:
 
 ```
-/hormozi-x             Tweet / X thread        →  5 variants
-/hormozi-yt            YouTube script          →  3 variants
-/hormozi-ig            Instagram caption       →  5 variants
-/hormozi-tt            TikTok script           →  5 variants
-/hormozi-newsletter    Email newsletter        →  3 variants
+/himoozai-x             Tweet / X thread        → 10 variants
+/himoozai-yt            YouTube script          →  3 variants
+/himoozai-ig            Instagram Reel script   →  5 variants
+/himoozai-tt            TikTok script           →  5 variants
+/himoozai-newsletter    Email newsletter        →  3 variants
 ```
 
-Each one runs the same locked sub-flow: **load context + your data + the platform's pre-installed Hormozi prompt → pick 1-5 reference pieces from your past content → submit your idea → variants returned → save the chosen one.**
+Each one runs the same locked sub-flow:
 
-It does **content only**. It will never give business advice, analyse your offer, or comment on your strategy.
+> pick 1–5 inspiration pieces → submit your idea → variants returned → save the chosen one
+
+The agent infuses **YOUR voice** into the **inspiration's structure**, governed by Hormozi's actual published content prompts (baked in per platform).
+
+## What's pre-installed
+
+The plugin ships with the real Hormozi-method prompts for each platform:
+
+- **Tweet Style Analyzer** (calibrated against 5,080 @AlexHormozi tweets)
+- **YouTube Script Style Extractor**
+- **Short-Form Content Extractor** (TikTok / IG Reels)
+- **Newsletter Style Analyzer**
+
+You don't paste prompts. You don't write prompts. You give an idea, you get content.
+
+## What this agent does NOT do
+
+- ❌  Doesn't give business advice
+- ❌  Doesn't analyse your offer, pricing, or strategy
+- ❌  Doesn't suggest improvements to your business
+- ✅  Only makes content. Forever.
 
 ## Files it creates on your machine
 
 ```
-~/.claude/hormozi-setup.json     # Wizard progress (2 flags: onboarded, data_pulled)
-~/hormozi/business.md            # The 12 answers
-~/hormozi/data/                  # Your tweets, YT transcripts, IG, TikTok captions
-~/hormozi/output/                # Saved generations, one .md per piece
+~/.claude/himoozai-setup.json     # Setup progress
+~/himoozai/business.md            # The 12 answers (your voice + offer)
+~/himoozai/data/                  # Your past content (voice anchor)
+~/himoozai/inspiration/           # Creators you model (style anchors)
+~/himoozai/output/                # Saved generations (one .md per piece)
 ```
 
 Everything is local. Edit `business.md` by hand any time.
 
 ## Built by
 
-[Dream Labs AI](https://github.com/dreamlabs-ai) — running on the back of Alex Hormozi's frameworks. All credit to Alex.
+[Dream Labs AI](https://github.com/dreamlabs-ai). The method is Alex Hormozi's. Credit to him.
